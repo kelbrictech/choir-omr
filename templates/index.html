@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Choir OMR</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main>
+  <section class="card">
+    <p class="eyebrow">ENGINE {{ engine_version }}</p>
+    <h1>Choir OMR</h1>
+    <p>Upload a choir score. The engine reconstructs the notation and produces MIDI for evaluation.</p>
+    <form id="form">
+      <label class="drop">PDF score<input id="score" name="score" type="file" accept=".pdf,application/pdf" required></label>
+      <button>Process score</button>
+    </form>
+    <section id="processing" hidden>
+      <h2 id="stage">Processing score…</h2>
+      <progress id="bar" max="100" value="0"></progress>
+      <p id="percent">0%</p>
+    </section>
+    <section id="result" hidden>
+      <h2 id="resultTitle"></h2>
+      <p id="diagnostics"></p>
+      <a id="download" class="button" hidden>Download MIDI</a>
+    </section>
+  </section>
+</main>
+<script>
+const form=document.querySelector("#form"), processing=document.querySelector("#processing"),
+stage=document.querySelector("#stage"), bar=document.querySelector("#bar"), pct=document.querySelector("#percent"),
+result=document.querySelector("#result"), title=document.querySelector("#resultTitle"),
+diag=document.querySelector("#diagnostics"), download=document.querySelector("#download");
+form.addEventListener("submit", async e=>{
+ e.preventDefault(); result.hidden=true; processing.hidden=false; stage.textContent="Processing score…"; bar.value=5; pct.textContent="5%";
+ const body=new FormData(form);
+ const r=await fetch("/process",{method:"POST",body}); const data=await r.json();
+ bar.value=data.percent||0; pct.textContent=(data.percent||0)+"%"; stage.textContent=data.stage||"Complete";
+ result.hidden=false; diag.textContent=(data.diagnostics||[data.error]).join(" ");
+ if(data.passed){title.textContent="MIDI ready"; download.href=data.download; download.hidden=false;}
+ else {title.textContent="Engine validation stopped output"; download.hidden=true;}
+});
+</script>
+</body>
+</html>
