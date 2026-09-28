@@ -38,7 +38,7 @@ form.addEventListener("submit", async e=>{
  const body=new FormData(form);
  const r=await fetch("/process",{method:"POST",body}); const data=await r.json();
  bar.value=data.percent||0; pct.textContent=(data.percent||0)+"%"; stage.textContent=data.stage||"Complete";
- result.hidden=false; diag.textContent=(data.diagnostics||[data.error]).join(" ");
+ result.hidden=false; download.hidden=true; download.removeAttribute("href"); diag.textContent=(data.diagnostics||[data.error]).join(" ");
  if(data.passed){title.textContent="MIDI ready"; download.href=data.download; download.hidden=false;}
  else {title.textContent="Engine validation stopped output"; download.hidden=true;}
 });
